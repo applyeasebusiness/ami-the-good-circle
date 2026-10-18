@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#176b43">
+  <title>Admin | AMI – The Good Circle</title><link rel="stylesheet" href="styles.css">
+  <style>
+    body{background:#f7f8f5}.admin-shell{max-width:1200px;margin:auto;padding:36px 24px 70px}.admin-top{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:28px}.admin-top h1{font-size:clamp(2rem,4vw,3rem);margin:0}.admin-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;margin:18px 0;box-shadow:var(--shadow)}.admin-login{max-width:480px;margin:48px auto}.admin-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}.admin-tabs button{border:1px solid var(--line);border-radius:100px;padding:11px 16px;background:#fff;color:var(--ink);font:600 .9rem 'DM Sans',sans-serif;cursor:pointer}.admin-tabs button[aria-selected="true"]{background:var(--green);color:#fff}.admin-panel[hidden], [hidden]{display:none!important}.admin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.admin-field{display:flex;flex-direction:column;gap:6px}.admin-field label{font-size:.86rem;font-weight:700}.admin-field input,.admin-field textarea,.admin-field select{width:100%;padding:11px 12px;border:1px solid #d4ddd5;border-radius:10px;font:inherit;background:white}.admin-field.full{grid-column:1/-1}.admin-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.admin-actions button,.admin-table button{border:1px solid var(--line);border-radius:9px;background:white;padding:8px 11px;cursor:pointer;font:600 .82rem 'DM Sans',sans-serif}.admin-actions .primary{background:var(--green);color:white;border-color:var(--green)}.admin-actions .danger,.admin-table .danger{color:#a52b21;border-color:#e7b8b2}.admin-table-wrap{overflow-x:auto}.admin-table{border-collapse:collapse;width:100%;min-width:720px}.admin-table th,.admin-table td{text-align:left;padding:12px;border-bottom:1px solid var(--line);vertical-align:top;font-size:.88rem}.admin-table th{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}.admin-table select,.admin-table textarea{max-width:220px;padding:8px;border:1px solid var(--line);border-radius:8px;font:inherit}.admin-muted{color:var(--muted);font-size:.9rem}.admin-status{padding:12px 14px;border-radius:10px;background:var(--green-soft);color:var(--green-dark);margin:12px 0}.admin-status.error{background:#fff0ed;color:#8d281c}.admin-badge{display:inline-block;padding:4px 8px;border-radius:99px;background:#eef2ed;font-size:.75rem;font-weight:700}.admin-thumb{width:72px;height:58px;object-fit:cover;border-radius:8px}.admin-danger-note{background:#fff1dc;border-radius:12px;padding:14px;color:#65471b;font-size:.9rem}.admin-empty{padding:20px;text-align:center;color:var(--muted)}@media(max-width:650px){.admin-shell{padding:24px 16px}.admin-grid{grid-template-columns:1fr}.admin-field.full{grid-column:auto}.admin-top{align-items:flex-start;flex-direction:column}.admin-card{padding:16px}}
+  </style>
+</head>
+<body>
+<header class="site-header"><a class="brand" href="index.html"><img class="brand-logo" src="assets/ami-logo.jpg" alt="AMI – The Good Circle official logo"><span class="brand-copy"><strong>THE GOOD CIRCLE</strong><small>ADMINISTRATION</small></span></a><a class="text-link" href="index.html">View public website ↗</a></header>
+<main class="admin-shell">
+  <section id="login-panel" class="admin-card admin-login">
+    <p class="eyebrow">RESTRICTED ACCESS</p><h1 style="font-size:2.2rem">Admin sign in</h1>
+    <p class="admin-muted">Sign in with an authorized AMI administrator account. Access is enforced by Supabase Auth and Row Level Security.</p>
+    <form id="login-form" class="admin-grid">
+      <div class="admin-field full"><label for="login-email">Email address</label><input id="login-email" type="email" autocomplete="username" required></div>
+      <div class="admin-field full"><label for="login-password">Password</label><input id="login-password" type="password" autocomplete="current-password" required></div>
+      <div class="admin-field full"><button class="button button-primary" type="submit">Sign in securely</button></div>
+    </form><p id="login-status" class="form-status" role="status" aria-live="polite"></p>
+    <p class="admin-muted">Create the initial account in Supabase Authentication, then promote its UUID to admin using the SQL instructions in the setup guide. Public sign-up is intentionally not provided here.</p>
+  </section>
+
+  <section id="dashboard" hidden>
+    <div class="admin-top"><div><p class="eyebrow">AMI ADMINISTRATION</p><h1>Good Circle dashboard</h1><p id="admin-user" class="admin-muted"></p></div><div class="admin-actions"><button id="refresh-button">Refresh data</button><button id="signout-button">Sign out</button></div></div>
+    <div id="global-status" role="status" aria-live="polite"></div>
+    <div class="admin-danger-note">Donations and payment processing are not available in this dashboard. Do not accept money or make tax-benefit claims until legal status and applicable fundraising/payment requirements are verified.</div>
+    <nav class="admin-tabs" role="tablist" aria-label="Admin sections">
+      <button role="tab" id="tab-submissions" aria-controls="panel-submissions" aria-selected="true" data-tab="submissions">Submissions</button>
+      <button role="tab" id="tab-events" aria-controls="panel-events" aria-selected="false" data-tab="events">Events</button>
+      <button role="tab" id="tab-gallery" aria-controls="panel-gallery" aria-selected="false" data-tab="gallery">Gallery</button>
+    </nav>
+    <section id="panel-submissions" class="admin-panel" role="tabpanel" aria-labelledby="tab-submissions">
+      <div class="admin-card"><div class="admin-top"><div><h2 style="font-size:1.65rem">Form submissions</h2><p class="admin-muted">Contact, volunteer and membership enquiries. Handle personal data confidentially.</p></div><select id="submission-filter" aria-label="Filter submissions"><option value="all">All statuses</option><option value="new">New</option><option value="in_review">In review</option><option value="responded">Responded</option><option value="closed">Closed</option></select></div><div id="submissions-list" class="admin-table-wrap"><p class="admin-empty">Loading submissions…</p></div></div>
+    </section>
+    <section id="panel-events" class="admin-panel" role="tabpanel" aria-labelledby="tab-events" hidden>
+      <div class="admin-card"><h2 style="font-size:1.65rem" id="event-form-title">Add an event</h2><form id="event-form" class="admin-grid">
+        <input type="hidden" id="event-id">
+        <div class="admin-field"><label for="event-title">Event title *</label><input id="event-title" required maxlength="140"></div>
+        <div class="admin-field"><label for="event-slug">URL slug *</label><input id="event-slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="art-for-assam-2026"></div>
+        <div class="admin-field full"><label for="event-description">Description *</label><textarea id="event-description" rows="3" required maxlength="4000"></textarea></div>
+        <div class="admin-field"><label for="event-location">Venue / location</label><input id="event-location" maxlength="250"></div>
+        <div class="admin-field"><label for="event-registration">Registration URL (optional)</label><input id="event-registration" type="url" placeholder="https://…"></div>
+        <div class="admin-field"><label for="event-start">Start date and time</label><input id="event-start" type="datetime-local"></div>
+        <div class="admin-field"><label for="event-end">End date and time</label><input id="event-end" type="datetime-local"></div>
+        <div class="admin-field full"><label for="event-image">Cover image URL (optional)</label><input id="event-image" type="url" placeholder="https://…"></div>
+        <div class="admin-field"><label for="event-status">Publication status</label><select id="event-status"><option value="draft">Draft (private)</option><option value="published">Published (public)</option><option value="archived">Archived</option></select></div>
+        <div class="admin-field full admin-actions"><button class="button button-primary" type="submit">Save event</button><button id="event-cancel" type="button">Clear form</button></div>
+      </form></div><div class="admin-card"><h2 style="font-size:1.65rem">Manage events</h2><div id="events-list" class="admin-table-wrap"><p class="admin-empty">Loading events…</p></div></div>
+    </section>
+    <section id="panel-gallery" class="admin-panel" role="tabpanel" aria-labelledby="tab-gallery" hidden>
+      <div class="admin-card"><h2 style="font-size:1.65rem" id="gallery-form-title">Add gallery item</h2><p class="admin-muted">Upload a JPG, PNG or WebP image up to 5 MB. Obtain permission before publishing photos, especially identifiable photos of children.</p>
+      <form id="gallery-form" class="admin-grid"><input type="hidden" id="gallery-id"><input type="hidden" id="gallery-existing-image">
+        <div class="admin-field"><label for="gallery-title">Title *</label><input id="gallery-title" required maxlength="140"></div>
+        <div class="admin-field"><label for="gallery-date">Event date</label><input id="gallery-date" type="date"></div>
+        <div class="admin-field full"><label for="gallery-alt">Image description / alt text *</label><input id="gallery-alt" required maxlength="250"></div>
+        <div class="admin-field full"><label for="gallery-caption">Caption</label><textarea id="gallery-caption" rows="2" maxlength="1000"></textarea></div>
+        <div class="admin-field full"><label for="gallery-file">Image file (leave empty to keep existing image)</label><input id="gallery-file" type="file" accept="image/jpeg,image/png,image/webp"></div>
+        <div class="admin-field"><label for="gallery-published">Visibility</label><select id="gallery-published"><option value="false">Draft (private)</option><option value="true">Published (public)</option></select></div>
+        <div class="admin-field"><label for="gallery-order">Sort order</label><input id="gallery-order" type="number" value="0" min="0" max="10000"></div>
+        <div class="admin-field full admin-actions"><button class="button button-primary" type="submit">Save gallery item</button><button id="gallery-cancel" type="button">Clear form</button></div>
+      </form></div><div class="admin-card"><h2 style="font-size:1.65rem">Manage gallery</h2><div id="gallery-list" class="admin-table-wrap"><p class="admin-empty">Loading gallery…</p></div></div>
+    </section>
+  </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="admin-config.js"></script><script src="admin.js"></script>
+</body></html>

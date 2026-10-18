@@ -1,0 +1,15 @@
+# OS / editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local environment files (do not commit secrets)
+.env
+.env.*
+!.env.example
+
+# Dependencies / build output if added later
+node_modules/
+dist/
+.vercel/
