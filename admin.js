@@ -260,7 +260,7 @@
       ['homepage_heading_highlight','copy-home-heading-highlight'],['homepage_subtitle','copy-home-subtitle'],
       ['about_heading','copy-about-heading'],['about_intro','copy-about-intro'],
       ['initiatives_heading','copy-initiatives-heading'],['initiatives_intro','copy-initiatives-intro'],
-      ['transparency_heading','copy-transparency-heading'],['transparency_intro','copy-transparency-intro']
+      ['transparency_heading','copy-transparency-heading'],['transparency_intro','copy-transparency-intro'],['home_intro_heading','copy-home-intro-heading'],['home_intro_body','copy-home-intro-body'],['nature_title','copy-nature-title'],['nature_description','copy-nature-description'],['society_title','copy-society-title'],['society_description','copy-society-description'],['culture_title','copy-culture-title'],['culture_description','copy-culture-description'],['about_vision','copy-about-vision'],['about_mission','copy-about-mission'],['about_values_intro','copy-about-values'],['initiatives_nature_description','copy-initiative-nature'],['initiatives_society_description','copy-initiative-society'],['initiatives_culture_description','copy-initiative-culture']
     ];
     const rows = pairs.map(([setting_key,id]) => ({setting_key,setting_value:$(id).value.trim()}));
     const {error}=await supabase.from('site_settings').upsert(rows,{onConflict:'setting_key'});
@@ -276,7 +276,7 @@
     $('hero-image-url').value = values.homepage_hero_image_url || '';
     $('hero-image-alt').value = values.homepage_hero_image_alt || 'AMI – The Good Circle community and initiatives';
     renderHeroPreview(values.homepage_hero_image_url || '');
-    const fields = { 'copy-home-eyebrow':'homepage_eyebrow','copy-home-heading-first':'homepage_heading_first','copy-home-heading-highlight':'homepage_heading_highlight','copy-home-subtitle':'homepage_subtitle','copy-about-heading':'about_heading','copy-about-intro':'about_intro','copy-initiatives-heading':'initiatives_heading','copy-initiatives-intro':'initiatives_intro','copy-transparency-heading':'transparency_heading','copy-transparency-intro':'transparency_intro' };
+    const fields = { 'copy-home-eyebrow':'homepage_eyebrow','copy-home-heading-first':'homepage_heading_first','copy-home-heading-highlight':'homepage_heading_highlight','copy-home-subtitle':'homepage_subtitle','copy-about-heading':'about_heading','copy-about-intro':'about_intro','copy-initiatives-heading':'initiatives_heading','copy-initiatives-intro':'initiatives_intro','copy-transparency-heading':'transparency_heading','copy-transparency-intro':'transparency_intro', 'copy-home-intro-heading':'home_intro_heading','copy-home-intro-body':'home_intro_body','copy-nature-title':'nature_title','copy-nature-description':'nature_description','copy-society-title':'society_title','copy-society-description':'society_description','copy-culture-title':'culture_title','copy-culture-description':'culture_description','copy-about-vision':'about_vision','copy-about-mission':'about_mission','copy-about-values':'about_values_intro','copy-initiative-nature':'initiatives_nature_description','copy-initiative-society':'initiatives_society_description','copy-initiative-culture':'initiatives_culture_description' };
     Object.entries(fields).forEach(([id,key]) => { if ($(id)) $(id).value = values[key] || ''; });
   }
   function renderHeroPreview(url) {
