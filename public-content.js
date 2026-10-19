@@ -98,7 +98,8 @@
       'home-heading-highlight':'homepage_heading_highlight','home-subtitle':'homepage_subtitle',
       'about-page-heading':'about_heading','about-page-intro':'about_intro',
       'initiatives-page-heading':'initiatives_heading','initiatives-page-intro':'initiatives_intro',
-      'transparency-page-heading':'transparency_heading','transparency-page-intro':'transparency_intro'
+      'transparency-page-heading':'transparency_heading','transparency-page-intro':'transparency_intro',
+      'home-intro-heading':'home_intro_heading','home-intro-body':'home_intro_body','home-nature-title':'nature_title','home-nature-description':'nature_description','home-society-title':'society_title','home-society-description':'society_description','home-culture-title':'culture_title','home-culture-description':'culture_description','about-vision':'about_vision','about-mission':'about_mission','about-values-intro':'about_values_intro','initiative-nature-description':'initiatives_nature_description','initiative-society-description':'initiatives_society_description','initiative-culture-description':'initiatives_culture_description'
     };
     Object.entries(targets).forEach(([id,key])=>{const el=document.getElementById(id);if(el&&v[key])el.textContent=v[key];});
   }
