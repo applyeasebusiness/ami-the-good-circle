@@ -4,6 +4,7 @@ create table if not exists public.blog_posts (
   title text not null,
   slug text not null unique,
   excerpt text not null default '',
+  seo_description text not null default '',
   body text not null default '',
   cover_image_url text not null default '',
   author_name text not null default '',
@@ -29,3 +30,6 @@ for select to anon, authenticated using (status = 'published' or public.is_ami_a
 drop policy if exists "Admins manage blog posts" on public.blog_posts;
 create policy "Admins manage blog posts" on public.blog_posts
 for all to authenticated using (public.is_ami_admin()) with check (public.is_ami_admin());
+
+-- Safe for an existing blog_posts table.
+alter table public.blog_posts add column if not exists seo_description text not null default '';
