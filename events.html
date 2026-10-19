@@ -1,56 +1,11 @@
-﻿<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Events & Gallery | AMI – The Good Circle</title><meta name="description" content="Discover AMI – The Good Circle events, creative arts activities and community gallery showcasing our work across Assam.">
-  <link rel="stylesheet" href="styles.css"><link rel="canonical" href="https://ami-the-good-circle.vercel.app/events"><meta name="robots" content="index,follow,max-image-preview:large"><meta property="og:type" content="website"><meta property="og:site_name" content="AMI – The Good Circle"><meta property="og:title" content="Events & Gallery | AMI – The Good Circle"><meta property="og:description" content="Discover AMI – The Good Circle events, creative arts activities and community gallery showcasing our work across Assam."><meta property="og:url" content="https://ami-the-good-circle.vercel.app/events"><meta property="og:image" content="https://ami-the-good-circle.vercel.app/assets/ami-logo.jpg"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Events & Gallery | AMI – The Good Circle"><meta name="twitter:description" content="Discover AMI – The Good Circle events, creative arts activities and community gallery showcasing our work across Assam."><meta name="twitter:image" content="https://ami-the-good-circle.vercel.app/assets/ami-logo.jpg">
-</head>
-<body>
-<header class="site-header">
-  <a class="brand" href="index.html">
-    <img class="brand-logo" src="/assets/ami-logo.jpg" alt="AMI – The Good Circle official logo">
-    <span class="brand-copy"><strong>THE GOOD CIRCLE</strong><small>GOOD PEOPLE · GOOD ACTIONS · GOOD CHANGE</small></span>
-  </a>
-  <button class="menu-toggle" aria-expanded="false" aria-controls="site-nav">Menu ☰</button>
-  <nav id="site-nav" class="site-nav">
-    <a href="about.html">About</a><a href="initiatives.html">Initiatives</a><a href="events.html">Events</a><a href="blogs.html">Blog</a><a href="transparency.html">Transparency</a><a class="nav-cta" href="index.html#volunteer">Get involved</a>
-  </nav>
-</header>
-
-<main>
-  <section class="page-hero">
-    <p class="eyebrow">COME TOGETHER</p>
-    <h1>Events & gallery</h1>
-    <p class="section-lead">Discover opportunities to participate and celebrate community action.</p>
-  </section>
-
-  <section class="page-content">
-    <h2>Published events</h2>
-    <p>Events shown here are managed by AMI administrators. Only events marked as published appear publicly.</p>
-    <div id="published-events" aria-live="polite">
-      <p class="admin-muted">Loading published events…</p>
-    </div>
-
-    <h2>Gallery</h2>
-    <p>Only approved photographs published by AMI administrators appear here. Identifiable photos, especially of children, should be published only with appropriate permission.</p>
-    <div id="published-gallery" class="simple-grid" aria-live="polite">
-      <p class="admin-muted">Loading approved gallery photographs…</p>
-    </div>
-  </section>
-</main>
-
-<dialog id="content-viewer" class="content-viewer" aria-labelledby="viewer-title"><div class="viewer-layout"><div class="viewer-media"><img class="viewer-image" src="" alt=""></div><section class="viewer-details"><button class="viewer-close" type="button" aria-label="Close image viewer">&#215;</button><h2 class="viewer-title" id="viewer-title"></h2><p class="viewer-description"></p><p class="viewer-caption"></p><p class="viewer-date admin-muted"></p></section></div></dialog>
-<footer class="site-footer">
-  <div class="footer-bottom"><span>© <span id="year"></span> AMI – The Good Circle.</span><span>Nature · Society · Culture</span></div>
-</footer>
-<script src="script.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="admin-config.js"></script>
-<script src="public-content.js"></script><script>document.querySelector(".viewer-close")?.addEventListener("click",()=>document.getElementById("content-viewer")?.close());</script>
-</body>
-</html>
-
-
-
-
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Events & Gallery | AMI – The Good Circle</title><meta name="description" content="Explore published AMI – The Good Circle events and approved community photographs from activities across Assam.">
+<meta name="theme-color" content="#176b43"><meta name="robots" content="index,follow,max-image-preview:large"><link rel="canonical" href="https://ami-the-good-circle.vercel.app/events"><link rel="stylesheet" href="styles.css"><meta property="og:type" content="website"><meta property="og:site_name" content="AMI – The Good Circle"><meta property="og:title" content="Events & Gallery | AMI – The Good Circle"><meta property="og:description" content="Explore community events and approved photographs from AMI."><meta property="og:url" content="https://ami-the-good-circle.vercel.app/events"><meta property="og:image" content="https://ami-the-good-circle.vercel.app/assets/ami-logo.jpg"></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><a class="brand" href="index.html" aria-label="AMI – The Good Circle home"><img class="brand-logo" src="/assets/ami-logo.jpg" alt="AMI – The Good Circle official logo"><span class="brand-copy"><strong>THE GOOD CIRCLE</strong><small>GOOD PEOPLE · GOOD ACTIONS · GOOD CHANGE</small></span></a><button class="menu-toggle" aria-expanded="false" aria-controls="site-nav">Menu ☰</button><nav id="site-nav" class="site-nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="about.html">About</a><a href="initiatives.html">Initiatives</a><a href="team.html">Our team</a><a href="blogs.html">Blogs</a><a href="events.html" aria-current="page">Events &amp; gallery</a><a href="transparency.html">Transparency</a><a class="nav-cta" href="contact.html">Get involved</a></nav></header>
+<main id="main"><section class="page-hero"><p class="eyebrow">TOGETHER, IN ACTION</p><h1>Our events and shared moments.</h1><p class="section-lead">Discover published events and approved photographs from the AMI community. The AMI team manages what appears here through the admin dashboard.</p></section>
+<section class="page-content"><div class="section-heading"><div><p class="eyebrow">JOIN US</p><h2>Published events</h2></div><p>What's happening in the circle.</p></div><div id="published-events" class="published-events"><p class="admin-muted">Loading published events…</p></div></section>
+<section class="page-content soft-section" id="gallery"><div class="section-heading"><div><p class="eyebrow">MOMENTS THAT MATTER</p><h2>Community gallery</h2></div><p>Approved photographs and stories.</p></div><div id="published-gallery" class="card-grid three"><p class="admin-muted">Loading approved photographs…</p></div></section>
+<dialog id="content-viewer" class="content-viewer" aria-labelledby="viewer-title"><div class="viewer-layout"><div class="viewer-media"><img class="viewer-image" src="" alt=""></div><section class="viewer-details"><button class="viewer-close" type="button" aria-label="Close image viewer">&#215;</button><p class="eyebrow">AMI COMMUNITY GALLERY</p><h2 class="viewer-title" id="viewer-title"></h2><p class="viewer-description"></p><p class="viewer-caption"></p><p class="viewer-date admin-muted"></p></section></div></dialog></main>
+<footer class="site-footer"><div class="footer-main"><div><a class="brand footer-brand" href="index.html"><img class="brand-logo" src="/assets/ami-logo.jpg" alt="AMI – The Good Circle official logo"><span class="brand-copy"><strong>THE GOOD CIRCLE</strong><small>GOOD PEOPLE · GOOD ACTIONS · GOOD CHANGE</small></span></a><p>Our Land. Our People. Our Responsibility.</p></div><div><strong>Explore</strong><a href="about.html">About us</a><a href="initiatives.html">Initiatives</a><a href="team.html">Our team</a></div><div><strong>Stories & events</strong><a href="blogs.html">Blogs</a><a href="events.html">Events & gallery</a><a href="contact.html">Get involved</a></div><div><strong>Accountability</strong><a href="transparency.html">Transparency</a><a href="privacy.html">Privacy policy</a><a href="admin.html">Admin</a></div></div><div class="footer-bottom"><span>© <span id="year"></span> AMI – The Good Circle. All rights reserved.</span><span>Built around Nature · Society · Culture</span></div></footer>
+<script src="script.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="admin-config.js"></script><script src="public-content.js"></script></body></html>
