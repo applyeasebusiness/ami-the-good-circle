@@ -79,5 +79,13 @@
     host.innerHTML=data.map(m=>'<article class="team-card">'+(m.photo_url?'<img src="'+esc(m.photo_url)+'" alt="Portrait of '+esc(m.name)+'" loading="lazy">':'<div class="team-placeholder" aria-hidden="true">'+esc((m.name||'AMI').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase())+'</div>')+'<div class="team-card-body"><p class="team-role">'+esc(m.role_title)+'</p><h2>'+esc(m.name)+'</h2><p>'+esc(m.bio)+'</p></div></article>').join('');
   }
 
-  loadEvents(); loadGallery(); loadBlogs(); loadArticle(); loadHomepageFeatures(); loadTeam();
+
+  async function loadPublicDocuments() {
+    const host=document.getElementById('public-documents'); if(!host)return;
+    const {data,error}=await client.from('public_documents').select('title,category,description,document_url').eq('published',true).order('sort_order',{ascending:true}).order('created_at',{ascending:false});
+    if(error||!data?.length){host.innerHTML='<p class="admin-muted">Public documents will appear here when approved and published by the AMI team.</p>';return;}
+    host.innerHTML=data.map(d=>'<article class="document-card"><span class="doc-icon">'+esc((d.category||'DOC').slice(0,5).toUpperCase())+'</span><div><p class="eyebrow">'+esc(d.category)+'</p><h3>'+esc(d.title)+'</h3><p>'+esc(d.description)+'</p><a class="text-link" href="'+esc(d.document_url)+'" target="_blank" rel="noopener noreferrer">View document →</a></div></article>').join('');
+  }
+
+  loadEvents(); loadGallery(); loadBlogs(); loadArticle(); loadHomepageFeatures(); loadTeam(); loadPublicDocuments();
 })();
