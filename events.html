@@ -14,7 +14,7 @@
   </a>
   <button class="menu-toggle" aria-expanded="false" aria-controls="site-nav">Menu ☰</button>
   <nav id="site-nav" class="site-nav">
-    <a href="about.html">About</a><a href="initiatives.html">Initiatives</a><a href="events.html">Events</a><a href="transparency.html">Transparency</a><a class="nav-cta" href="index.html#volunteer">Get involved</a>
+    <a href="about.html">About</a><a href="initiatives.html">Initiatives</a><a href="events.html">Events</a><a href="blogs.html">Blog</a><a href="transparency.html">Transparency</a><a class="nav-cta" href="index.html#volunteer">Get involved</a>
   </nav>
 </header>
 
@@ -46,6 +46,6 @@
 <script src="script.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="admin-config.js"></script>
-<script src="public-content.js"></script>
+<script src="public-content.js"></script><script>document.querySelector(".viewer-close")?.addEventListener("click",()=>document.getElementById("content-viewer")?.close());</script>
 </body>
 </html>
