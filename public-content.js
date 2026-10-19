@@ -24,5 +24,21 @@
     if (!data?.length) { message('published-gallery','No photographs have been published yet. Please check back after approved photos are added.'); return; }
     host.innerHTML = data.map(item => `<article class="simple-card"><img src="${esc(item.image_url)}" alt="${esc(item.alt_text)}" loading="lazy" class="content-image gallery-thumb"><h3 style="margin-top:14px">${esc(item.title)}</h3>${item.caption ? `<p>${esc(item.caption)}</p>` : ''}${item.event_date ? `<p class="admin-muted">${esc(date(item.event_date))}</p>` : ''}</article>`).join('');
   }
-  loadEvents(); loadGallery();
+
+  async function loadBlogs() {
+    const host = document.getElementById('published-blogs'); if (!host) return;
+    const { data, error } = await client.from('blog_posts').select('title,slug,excerpt,cover_image_url,author_name,published_at').eq('status','published').order('published_at',{ascending:false,nullsFirst:false});
+    if (error) { message('published-blogs','Blog articles are temporarily unavailable.'); return; }
+    if (!data?.length) { message('published-blogs','No articles have been published yet.'); return; }
+    host.innerHTML = data.map(x => `<article class="simple-card">${x.cover_image_url ? `<img class="content-image blog-cover" src="${esc(x.cover_image_url)}" alt="">` : ''}<p class="eyebrow">${esc(date(x.published_at))}</p><h2 class="content-card-title">${esc(x.title)}</h2><p>${esc(x.excerpt)}</p><p class="admin-muted">${esc(x.author_name)}</p><a class="text-link" href="blog.html?slug=${encodeURIComponent(x.slug)}">Read article ↗</a></article>`).join('');
+  }
+  async function loadArticle() {
+    const host = document.getElementById('blog-article'); if (!host) return;
+    const slug = new URLSearchParams(location.search).get('slug');
+    const { data, error } = await client.from('blog_posts').select('title,excerpt,body,cover_image_url,author_name,published_at').eq('slug',slug || '').eq('status','published').maybeSingle();
+    if (error || !data) { message('blog-article','This article is unavailable or has not been published.'); return; }
+    document.title = data.title + ' | AMI – The Good Circle';
+    host.innerHTML = `<article class="blog-article">${data.cover_image_url ? `<img class="content-image blog-article-cover" src="${esc(data.cover_image_url)}" alt="">` : ''}<p class="eyebrow">${esc(date(data.published_at))}</p><h1>${esc(data.title)}</h1><p class="section-lead">${esc(data.excerpt)}</p><p class="admin-muted">${esc(data.author_name)}</p><div class="blog-body">${esc(data.body).replace(/\n/g,'<br>')}</div></article>`;
+  }
+  loadEvents(); loadGallery(); loadBlogs(); loadArticle();
 })();
