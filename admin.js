@@ -10,6 +10,7 @@
   let events = [];
   let galleryItems = [];
   let blogPosts = [];
+  let teamMembers = [];
 
   function status(message, error = false) {
     globalStatus.innerHTML = '';
@@ -68,13 +69,14 @@
 
   async function loadAll() {
     status('Loading dashboard data…');
-    const [s, e, g, b] = await Promise.all([
+    const [s, e, g, b, t] = await Promise.all([
       supabase.from('form_submissions').select('id,form_type,payload,status,admin_notes,created_at').order('created_at', { ascending: false }).limit(500),
       supabase.from('events').select('*').order('starts_at', { ascending: false, nullsFirst: false }),
       supabase.from('gallery_items').select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: false }),
-      supabase.from('blog_posts').select('*').order('created_at', { ascending: false })
+      supabase.from('blog_posts').select('*').order('created_at', { ascending: false }),
+      supabase.from('team_members').select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: false })
     ]);
-    const failed = [s,e,g,b].find(x => x.error);
+    const failed = [s,e,g,b,t].find(x => x.error);
     if (failed) { status('Could not load some dashboard data. Confirm schema.sql was run and this user has the admin role.', true); console.error('Admin dashboard load error:', failed.error); }
     submissions = s.data || []; events = e.data || []; galleryItems = g.data || []; blogPosts = b.data || [];
     renderSubmissions(); renderEvents(); renderGallery(); renderBlogs();
