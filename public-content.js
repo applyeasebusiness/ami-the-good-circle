@@ -48,5 +48,36 @@
     let twitterDesc=document.querySelector('meta[name="twitter:description"]');if(twitterDesc)twitterDesc.content=seoDescription;
     host.innerHTML = `<article class="blog-article">${data.cover_image_url ? `<img class="content-image blog-article-cover" src="${esc(data.cover_image_url)}" alt="">` : ''}<p class="eyebrow">${esc(date(data.published_at))}</p><h1>${esc(data.title)}</h1><p class="section-lead">${esc(data.excerpt)}</p><p class="admin-muted">${esc(data.author_name)}</p><div class="blog-body">${safeRichHtml(data.body)}</div></article>`;
   }
-  loadEvents(); loadGallery(); loadBlogs(); loadArticle();
+
+  async function loadHomepageFeatures() {
+    const blogHost = document.getElementById('featured-blog');
+    if (blogHost) {
+      const {data,error} = await client.from('blog_posts').select('title,slug,excerpt,cover_image_url,author_name,published_at').eq('status','published').order('published_at',{ascending:false,nullsFirst:false}).limit(3);
+      if (error || !data?.length) blogHost.innerHTML = '<p class="admin-muted">New stories will appear here when published by the AMI team.</p>';
+      else blogHost.innerHTML = data.map(x => '<article class="home-feature-card">'+(x.cover_image_url?'<img class="feature-card-image" src="'+esc(x.cover_image_url)+'" alt="" loading="lazy">':'<div class="feature-card-image event-feature-art">AMI STORIES</div>')+'<div class="feature-card-body"><p class="eyebrow">'+esc(date(x.published_at))+'</p><h3>'+esc(x.title)+'</h3><p>'+esc(x.excerpt)+'</p><a class="text-link" href="blog.html?slug='+encodeURIComponent(x.slug)+'">Read story →</a></div></article>').join('');
+    }
+    const eventHost = document.getElementById('featured-event');
+    if (eventHost) {
+      const now = new Date().toISOString();
+      let result = await client.from('events').select('title,slug,description,location,starts_at,registration_url,cover_image_url').eq('status','published').gte('starts_at',now).order('starts_at',{ascending:true}).limit(1);
+      if (!result.data?.length) result = await client.from('events').select('title,slug,description,location,starts_at,registration_url,cover_image_url').eq('status','published').order('starts_at',{ascending:false,nullsFirst:false}).limit(1);
+      const x = result.data?.[0];
+      if (result.error || !x) eventHost.innerHTML='<p class="admin-muted">No public events are featured right now. Check back for updates.</p>';
+      else eventHost.innerHTML='<article class="featured-event-card">'+(x.cover_image_url?'<img src="'+esc(x.cover_image_url)+'" alt="" loading="lazy">':'<div class="event-feature-art">AMI EVENT</div>')+'<div class="feature-card-body"><p class="eyebrow">PUBLISHED EVENT</p><h3>'+esc(x.title)+'</h3><p>'+esc(x.description)+'</p><p><strong>Date:</strong> '+esc(date(x.starts_at)||'To be announced')+(x.location?'<br><strong>Venue:</strong> '+esc(x.location):'')+'</p><a class="button button-primary" href="events.html">View event details</a></div></article>';
+    }
+    const galleryHost = document.getElementById('featured-gallery');
+    if (galleryHost) {
+      const {data,error} = await client.from('gallery_items').select('title,image_url,alt_text,caption,event_date').eq('published',true).order('sort_order',{ascending:true}).order('created_at',{ascending:false}).limit(3);
+      if (error || !data?.length) galleryHost.innerHTML='<p class="admin-muted">Approved photographs will appear here when published by the AMI team.</p>';
+      else galleryHost.innerHTML=data.map(x=>'<article class="home-feature-card"><a href="events.html#gallery" aria-label="View '+esc(x.title)+' in gallery"><img class="feature-card-image" src="'+esc(x.image_url)+'" alt="'+esc(x.alt_text)+'" loading="lazy"></a><div class="feature-card-body"><p class="eyebrow">COMMUNITY GALLERY</p><h3>'+esc(x.title)+'</h3><p>'+esc(x.caption)+'</p><a class="text-link" href="events.html#gallery">View gallery →</a></div></article>').join('');
+    }
+  }
+  async function loadTeam() {
+    const host=document.getElementById('team-grid'); if(!host)return;
+    const {data,error}=await client.from('team_members').select('name,role_title,bio,photo_url').eq('published',true).order('sort_order',{ascending:true}).order('created_at',{ascending:true});
+    if(error||!data?.length){host.innerHTML='<p class="admin-muted">Team profiles will appear here when approved and published by the AMI team.</p>';return;}
+    host.innerHTML=data.map(m=>'<article class="team-card">'+(m.photo_url?'<img src="'+esc(m.photo_url)+'" alt="Portrait of '+esc(m.name)+'" loading="lazy">':'<div class="team-placeholder" aria-hidden="true">'+esc((m.name||'AMI').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase())+'</div>')+'<div class="team-card-body"><p class="team-role">'+esc(m.role_title)+'</p><h2>'+esc(m.name)+'</h2><p>'+esc(m.bio)+'</p></div></article>').join('');
+  }
+
+  loadEvents(); loadGallery(); loadBlogs(); loadArticle(); loadHomepageFeatures(); loadTeam();
 })();
