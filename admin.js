@@ -252,14 +252,32 @@
     host.querySelectorAll('[data-delete-document]').forEach(btn=>btn.addEventListener('click',async()=>{const d=publicDocuments.find(x=>x.id===btn.dataset.deleteDocument);if(!d||!confirm('Delete public document '+d.title+'?'))return;const {error}=await supabase.from('public_documents').delete().eq('id',d.id);if(error)status('Could not delete document.',true);else{await loadAll();status('Document deleted.');}}));
   }
 
+
+  $('page-copy-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    const pairs = [
+      ['homepage_eyebrow','copy-home-eyebrow'],['homepage_heading_first','copy-home-heading-first'],
+      ['homepage_heading_highlight','copy-home-heading-highlight'],['homepage_subtitle','copy-home-subtitle'],
+      ['about_heading','copy-about-heading'],['about_intro','copy-about-intro'],
+      ['initiatives_heading','copy-initiatives-heading'],['initiatives_intro','copy-initiatives-intro'],
+      ['transparency_heading','copy-transparency-heading'],['transparency_intro','copy-transparency-intro']
+    ];
+    const rows = pairs.map(([setting_key,id]) => ({setting_key,setting_value:$(id).value.trim()}));
+    const {error}=await supabase.from('site_settings').upsert(rows,{onConflict:'setting_key'});
+    if(error){status('Could not save page copy. Run supabase/page_content_settings_migration.sql first.',true);console.error(error);return;}
+    status('Page headings and introductions saved. Refresh the public pages to see the changes.');
+  });
+
   async function loadHeroSettings() {
     const preview = $('hero-image-preview');
-    const { data, error } = await supabase.from('site_settings').select('setting_key,setting_value').in('setting_key', ['homepage_hero_image_url','homepage_hero_image_alt']);
+    const { data, error } = await supabase.from('site_settings').select('setting_key,setting_value');
     if (error) { preview.innerHTML = '<p class="admin-muted">Homepage image settings are not configured yet. Run the homepage image migration in Supabase SQL Editor.</p>'; console.warn('Homepage settings unavailable:', error); return; }
     const values = Object.fromEntries((data || []).map(row => [row.setting_key, row.setting_value]));
     $('hero-image-url').value = values.homepage_hero_image_url || '';
     $('hero-image-alt').value = values.homepage_hero_image_alt || 'AMI – The Good Circle community and initiatives';
     renderHeroPreview(values.homepage_hero_image_url || '');
+    const fields = { 'copy-home-eyebrow':'homepage_eyebrow','copy-home-heading-first':'homepage_heading_first','copy-home-heading-highlight':'homepage_heading_highlight','copy-home-subtitle':'homepage_subtitle','copy-about-heading':'about_heading','copy-about-intro':'about_intro','copy-initiatives-heading':'initiatives_heading','copy-initiatives-intro':'initiatives_intro','copy-transparency-heading':'transparency_heading','copy-transparency-intro':'transparency_intro' };
+    Object.entries(fields).forEach(([id,key]) => { if ($(id)) $(id).value = values[key] || ''; });
   }
   function renderHeroPreview(url) {
     const preview = $('hero-image-preview');
