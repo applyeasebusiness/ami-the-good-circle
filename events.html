@@ -1,3 +1,51 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Events & Gallery | AMI – The Good Circle</title><link rel="stylesheet" href="styles.css"></head><body>
-<header class="site-header"><a class="brand" href="index.html"><img class="brand-logo" src="assets/ami-logo.jpg" alt="AMI – The Good Circle official logo"><span class="brand-copy"><strong>THE GOOD CIRCLE</strong><small>GOOD PEOPLE · GOOD ACTIONS · GOOD CHANGE</small></span></a><button class="menu-toggle" aria-expanded="false" aria-controls="site-nav">Menu ☰</button><nav id="site-nav" class="site-nav"><a href="about.html">About</a><a href="initiatives.html">Initiatives</a><a href="events.html">Events</a><a href="transparency.html">Transparency</a><a class="nav-cta" href="index.html#volunteer">Get involved</a></nav></header>
-<main><section class="page-hero"><p class="eyebrow">COME TOGETHER</p><h1>Events & gallery</h1><p class="section-lead">Discover opportunities to participate and celebrate community action.</p></section><section class="page-content"><article class="simple-card"><p class="eyebrow">FEATURED EVENT · 2026</p><h2>Art for Assam 2026</h2><p>A drawing and creative arts competition centred on Nature, Society and Culture.</p><ul><li><strong>Date:</strong> 17 October 2026 (as stated in event poster; verify current event status)</li><li><strong>Venue:</strong> Chitralekha Shiksha Bikash Mandir, Dhajaljan, Jorhat</li><li><strong>Age categories:</strong> 6–9, 10–13, 14–17 years</li><li><strong>Capacity:</strong> 150 participants, 50 per category</li><li><strong>Queries:</strong> 9101291229 (verify before publishing)</li></ul><div class="placeholder"><strong>Registration link placeholder:</strong> Add the official registration URL and update this page to say whether registration is open, closed or full. The date is approaching/past depending on publication time; verify status before launch.</div></article><h2>Gallery</h2><p>Upload only photographs you have permission to publish. Obtain parent/guardian consent before posting identifiable images of children.</p><div class="simple-grid"><div class="simple-card"><h3>Event photographs</h3><p>Replace this placeholder with approved event photos.</p></div><div class="simple-card"><h3>Community activities</h3><p>Add captions, dates, locations and accessible image descriptions.</p></div></div></section></main><footer class="site-footer"><div class="footer-bottom"><span>© <span id="year"></span> AMI – The Good Circle.</span><span>Nature · Society · Culture</span></div></footer><script src="script.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Events & Gallery | AMI – The Good Circle</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="index.html">
+    <img class="brand-logo" src="assets/ami-logo.jpg" alt="AMI – The Good Circle official logo">
+    <span class="brand-copy"><strong>THE GOOD CIRCLE</strong><small>GOOD PEOPLE · GOOD ACTIONS · GOOD CHANGE</small></span>
+  </a>
+  <button class="menu-toggle" aria-expanded="false" aria-controls="site-nav">Menu ☰</button>
+  <nav id="site-nav" class="site-nav">
+    <a href="about.html">About</a><a href="initiatives.html">Initiatives</a><a href="events.html">Events</a><a href="transparency.html">Transparency</a><a class="nav-cta" href="index.html#volunteer">Get involved</a>
+  </nav>
+</header>
+
+<main>
+  <section class="page-hero">
+    <p class="eyebrow">COME TOGETHER</p>
+    <h1>Events & gallery</h1>
+    <p class="section-lead">Discover opportunities to participate and celebrate community action.</p>
+  </section>
+
+  <section class="page-content">
+    <h2>Published events</h2>
+    <p>Events shown here are managed by AMI administrators. Only events marked as published appear publicly.</p>
+    <div id="published-events" aria-live="polite">
+      <p class="admin-muted">Loading published events…</p>
+    </div>
+
+    <h2>Gallery</h2>
+    <p>Only approved photographs published by AMI administrators appear here. Identifiable photos, especially of children, should be published only with appropriate permission.</p>
+    <div id="published-gallery" class="simple-grid" aria-live="polite">
+      <p class="admin-muted">Loading approved gallery photographs…</p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-bottom"><span>© <span id="year"></span> AMI – The Good Circle.</span><span>Nature · Society · Culture</span></div>
+</footer>
+<script src="script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="admin-config.js"></script>
+<script src="public-content.js"></script>
+</body>
+</html>
