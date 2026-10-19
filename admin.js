@@ -80,8 +80,8 @@
     ]);
     const failed = [s,e,g,b,t,d].find(x => x.error);
     if (failed) { status('Could not load some dashboard data. Confirm schema.sql was run and this user has the admin role.', true); console.error('Admin dashboard load error:', failed.error); }
-    submissions = s.data || []; events = e.data || []; galleryItems = g.data || []; blogPosts = b.data || []; teamMembers = t.data || [];
-    renderSubmissions(); renderEvents(); renderGallery(); renderBlogs(); renderTeam();
+    submissions = s.data || []; events = e.data || []; galleryItems = g.data || []; blogPosts = b.data || []; teamMembers = t.data || []; publicDocuments = d.data || [];
+    renderSubmissions(); renderEvents(); renderGallery(); renderBlogs(); renderTeam(); renderDocuments();
     if (!failed) status(`Loaded ${submissions.length} submissions, ${events.length} events and ${galleryItems.length} gallery items.`);
   }
 
