@@ -88,5 +88,20 @@
     host.innerHTML=data.map(d=>'<article class="document-card"><span class="doc-icon">'+esc((d.category||'DOC').slice(0,5).toUpperCase())+'</span><div><p class="eyebrow">'+esc(d.category)+'</p><h3>'+esc(d.title)+'</h3><p>'+esc(d.description)+'</p><a class="text-link" href="'+esc(d.document_url)+'" target="_blank" rel="noopener noreferrer">View document →</a></div></article>').join('');
   }
 
-  loadEvents(); loadGallery(); loadBlogs(); loadArticle(); loadHomepageFeatures(); loadTeam(); loadPublicDocuments();
+
+  async function loadPageCopy() {
+    const {data,error}=await client.from('site_settings').select('setting_key,setting_value');
+    if(error)return;
+    const v=Object.fromEntries((data||[]).map(row=>[row.setting_key,row.setting_value]));
+    const targets={
+      'home-eyebrow':'homepage_eyebrow','home-heading-first':'homepage_heading_first',
+      'home-heading-highlight':'homepage_heading_highlight','home-subtitle':'homepage_subtitle',
+      'about-page-heading':'about_heading','about-page-intro':'about_intro',
+      'initiatives-page-heading':'initiatives_heading','initiatives-page-intro':'initiatives_intro',
+      'transparency-page-heading':'transparency_heading','transparency-page-intro':'transparency_intro'
+    };
+    Object.entries(targets).forEach(([id,key])=>{const el=document.getElementById(id);if(el&&v[key])el.textContent=v[key];});
+  }
+
+  loadEvents(); loadGallery(); loadBlogs(); loadArticle(); loadHomepageFeatures(); loadTeam(); loadPublicDocuments(); loadPageCopy();
 })();
