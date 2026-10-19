@@ -63,6 +63,7 @@
     showDashboard(user);
     if (profile.display_name) $('admin-user').textContent = `${profile.display_name} · ${user.email || user.id}`;
     await loadAll();
+    await loadHeroSettings();
   }
 
   async function loadAll() {
@@ -171,6 +172,68 @@
   }
 
 
+
+
+  async function loadHeroSettings() {
+    const preview = $('hero-image-preview');
+    const { data, error } = await supabase.from('site_settings').select('setting_key,setting_value').in('setting_key', ['homepage_hero_image_url','homepage_hero_image_alt']);
+    if (error) { preview.innerHTML = '<p class="admin-muted">Homepage image settings are not configured yet. Run the homepage image migration in Supabase SQL Editor.</p>'; console.warn('Homepage settings unavailable:', error); return; }
+    const values = Object.fromEntries((data || []).map(row => [row.setting_key, row.setting_value]));
+    $('hero-image-url').value = values.homepage_hero_image_url || '';
+    $('hero-image-alt').value = values.homepage_hero_image_alt || 'AMI – The Good Circle community and initiatives';
+    renderHeroPreview(values.homepage_hero_image_url || '');
+  }
+  function renderHeroPreview(url) {
+    const preview = $('hero-image-preview');
+    if (!url) { preview.innerHTML = '<p class="admin-muted">No custom hero image saved. The default illustration will be shown.</p>'; return; }
+    preview.innerHTML = '<img src="' + safe(url) + '" alt="Homepage hero preview" style="display:block;width:100%;max-height:320px;object-fit:contain;border-radius:12px;background:#f5f5f0"><p class="admin-muted">Current hero image</p>';
+  }
+  $('hero-image-file').addEventListener('change', () => {
+    const file = $('hero-image-file').files?.[0];
+    if (!file) return;
+    if (!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) {
+      status('Choose a JPG, PNG or WebP image up to 5 MB.', true); $('hero-image-file').value = ''; return;
+    }
+    renderHeroPreview(URL.createObjectURL(file));
+  });
+  $('hero-image-url').addEventListener('change', () => { if ($('hero-image-url').value.trim()) renderHeroPreview($('hero-image-url').value.trim()); });
+  $('hero-image-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    const file = $('hero-image-file').files?.[0];
+    let imageUrl = $('hero-image-url').value.trim();
+    if (file) {
+      if (!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) { status('Choose a JPG, PNG or WebP image up to 5 MB.', true); return; }
+      const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg';
+      const path = 'homepage/hero-' + crypto.randomUUID() + '.' + ext;
+      status('Uploading homepage hero image…');
+      const upload = await supabase.storage.from('ami-gallery').upload(path, file, { cacheControl: '3600', upsert: false, contentType: file.type });
+      if (upload.error) { status('Hero upload failed. Check the ami-gallery bucket and admin storage permissions.', true); console.error(upload.error); return; }
+      imageUrl = supabase.storage.from('ami-gallery').getPublicUrl(path).data.publicUrl;
+    }
+    if (imageUrl && !/^https:\/\//i.test(imageUrl)) { status('Image URL must use HTTPS.', true); return; }
+    const alt = $('hero-image-alt').value.trim().slice(0,250) || 'AMI – The Good Circle community and initiatives';
+    const rows = [
+      { setting_key: 'homepage_hero_image_url', setting_value: imageUrl },
+      { setting_key: 'homepage_hero_image_alt', setting_value: alt }
+    ];
+    const { error } = await supabase.from('site_settings').upsert(rows, { onConflict: 'setting_key' });
+    if (error) { status('Could not save homepage image settings. Run the homepage image migration in Supabase first.', true); console.error(error); return; }
+    $('hero-image-file').value = ''; $('hero-image-url').value = imageUrl;
+    renderHeroPreview(imageUrl);
+    status(imageUrl ? 'Homepage hero image saved. Refresh the public homepage to view it.' : 'Homepage hero image URL cleared.');
+  });
+  $('hero-image-reset').addEventListener('click', async () => {
+    if (!confirm('Remove the custom homepage hero image and restore the default illustration?')) return;
+    const rows = [
+      { setting_key: 'homepage_hero_image_url', setting_value: '' },
+      { setting_key: 'homepage_hero_image_alt', setting_value: 'AMI – The Good Circle community and initiatives' }
+    ];
+    const { error } = await supabase.from('site_settings').upsert(rows, { onConflict: 'setting_key' });
+    if (error) { status('Could not restore the default illustration. Run the homepage image migration in Supabase first.', true); console.error(error); return; }
+    $('hero-image-file').value = ''; $('hero-image-url').value = '';
+    $('hero-image-alt').value = 'AMI – The Good Circle community and initiatives';
+    renderHeroPreview(''); status('Default homepage illustration restored.');
+  });
 
   const richEditor=$('blog-body');
   let savedEditorRange=null;
