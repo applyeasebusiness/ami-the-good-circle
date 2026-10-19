@@ -69,3 +69,15 @@
 .page-content{max-width:1240px;margin:0 auto;padding:clamp(36px,6vw,80px) clamp(20px,4vw,36px)}
 @media(max-width:1100px){.site-header{height:auto;min-height:78px;flex-wrap:wrap;padding-block:12px}.site-nav{width:100%;justify-content:center;flex-wrap:wrap}.home-hero{grid-template-columns:1fr 1fr}.home-hero-visual{min-height:350px}.home-feature-grid,.team-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.home-hero{grid-template-columns:1fr;padding-top:46px}.home-hero-visual{min-height:300px;grid-row:1}.home-hero h1{font-size:clamp(3rem,14vw,4.8rem)}.home-intro,.transparency-teaser{grid-template-columns:1fr;gap:22px}.home-feature-grid,.team-grid{grid-template-columns:1fr}.featured-event-card{grid-template-columns:1fr}.featured-event-card img,.featured-event-card .event-feature-art{min-height:230px;max-height:300px}.home-team-cta{align-items:flex-start;flex-direction:column}.site-nav{justify-content:flex-start;gap:12px}.site-nav a{font-size:.85rem}.trust-strip{justify-content:flex-start;padding-inline:24px}.team-card img,.team-placeholder{height:250px}}
+
+.document-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.document-card{display:flex;gap:20px;align-items:flex-start;padding:26px;border:1px solid var(--line);border-radius:20px;background:#fff;box-shadow:var(--shadow)}
+.document-card h3{font-size:1.2rem;margin:5px 0 10px}.document-card p:not(.eyebrow){color:var(--muted)}
+.transparency-footnote{margin-top:26px;max-width:800px}
+.published-events{display:grid;gap:20px}.published-events .simple-card{margin:0}
+.content-viewer{width:min(1120px,94vw);max-width:none;max-height:92vh;border:0;border-radius:22px;padding:0;box-shadow:0 25px 90px rgba(0,0,0,.35)}
+.content-viewer::backdrop{background:rgba(9,24,16,.76);backdrop-filter:blur(5px)}
+.viewer-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,.8fr);max-height:92vh}
+.viewer-media{background:#111;display:grid;place-items:center;min-height:280px}.viewer-image{max-width:100%;max-height:88vh;object-fit:contain}
+.viewer-details{position:relative;padding:34px;overflow:auto}.viewer-close{position:absolute;right:18px;top:18px;border:0;border-radius:50%;width:42px;height:42px;font-size:1.7rem;background:var(--cream);cursor:pointer}
+@media(max-width:760px){.document-grid{grid-template-columns:1fr}.viewer-layout{grid-template-columns:1fr;overflow:auto}.viewer-media{min-height:220px}.viewer-image{max-height:55vh}.viewer-details{padding:24px}}
