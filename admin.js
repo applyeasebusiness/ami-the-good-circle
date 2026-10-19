@@ -176,6 +176,48 @@
 
 
 
+
+  $('team-photo-file').addEventListener('change', () => {
+    const file = $('team-photo-file').files?.[0];
+    if (!file) return;
+    if (!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) {
+      status('Choose a JPG, PNG or WebP image up to 5 MB.', true); $('team-photo-file').value = ''; return;
+    }
+    $('team-photo-preview').innerHTML = '<p class="admin-muted">Selected photo: ' + safe(file.name) + '</p>';
+  });
+  $('team-photo-url').addEventListener('input', () => {
+    const url = $('team-photo-url').value.trim();
+    $('team-photo-preview').innerHTML = /^https:\/\//i.test(url) ? '<img src="' + safe(url) + '" alt="Team photo preview" style="display:block;width:100%;max-height:240px;object-fit:contain;border-radius:12px">' : '';
+  });
+  $('team-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    const id = $('team-id').value;
+    let photoUrl = $('team-photo-url').value.trim();
+    const file = $('team-photo-file').files?.[0];
+    if (file) {
+      const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg';
+      const path = 'team/' + crypto.randomUUID() + '.' + ext;
+      status('Uploading team photo…');
+      const upload = await supabase.storage.from('ami-gallery').upload(path, file, {cacheControl:'3600',upsert:false,contentType:file.type});
+      if (upload.error) { status('Photo upload failed. Check the ami-gallery bucket permissions.', true); console.error(upload.error); return; }
+      photoUrl = supabase.storage.from('ami-gallery').getPublicUrl(path).data.publicUrl;
+    }
+    if (photoUrl && !/^https:\/\//i.test(photoUrl)) { status('Photo URL must use HTTPS.', true); return; }
+    const payload = { name:$('team-name').value.trim(), role_title:$('team-role').value.trim(), bio:$('team-bio').value.trim(), photo_url:photoUrl, sort_order:Math.max(0,Number($('team-order').value)||0), published:$('team-published').value==='true' };
+    const result = id ? await supabase.from('team_members').update(payload).eq('id',id) : await supabase.from('team_members').insert(payload);
+    if (result.error) { status('Could not save team member. Run supabase/team_members_migration.sql first.',true); console.error(result.error); return; }
+    resetTeamForm(); await loadAll(); status('Team profile saved.');
+  });
+  $('team-cancel').addEventListener('click', resetTeamForm);
+  function resetTeamForm() { $('team-form').reset(); $('team-id').value=''; $('team-order').value='0'; $('team-published').value='false'; $('team-form-title').textContent='Add team member'; $('team-photo-preview').innerHTML=''; }
+  function renderTeam() {
+    const host = $('team-list'); if (!host) return;
+    if (!teamMembers.length) { host.innerHTML='<p class="admin-empty">No team profiles yet. Add a member above.</p>'; return; }
+    host.innerHTML='<table class="admin-table"><thead><tr><th>Person</th><th>Visibility</th><th>Actions</th></tr></thead><tbody>'+teamMembers.map(m=>'<tr><td>'+(m.photo_url?'<img class="admin-thumb" src="'+safe(m.photo_url)+'" alt="">':'')+'<strong>'+safe(m.name)+'</strong><br><span class="admin-muted">'+safe(m.role_title)+'</span><p>'+safe(m.bio).slice(0,180)+'</p></td><td><span class="admin-badge">'+(m.published?'published':'draft')+'</span></td><td><div class="admin-actions"><button data-edit-team="'+safe(m.id)+'">Edit</button><button class="danger" data-delete-team="'+safe(m.id)+'">Delete</button></div></td></tr>').join('')+'</tbody></table>';
+    host.querySelectorAll('[data-edit-team]').forEach(btn=>btn.addEventListener('click',()=>{const m=teamMembers.find(x=>x.id===btn.dataset.editTeam);if(!m)return;$('team-id').value=m.id;$('team-name').value=m.name;$('team-role').value=m.role_title;$('team-bio').value=m.bio;$('team-photo-url').value=m.photo_url;$('team-order').value=m.sort_order;$('team-published').value=String(m.published);$('team-form-title').textContent='Edit team member';$('team-photo-preview').innerHTML=m.photo_url?'<img src="'+safe(m.photo_url)+'" alt="Team photo preview" style="display:block;width:100%;max-height:240px;object-fit:contain;border-radius:12px">':'';$('panel-team').scrollIntoView({behavior:'smooth'});}));
+    host.querySelectorAll('[data-delete-team]').forEach(btn=>btn.addEventListener('click',async()=>{const m=teamMembers.find(x=>x.id===btn.dataset.deleteTeam);if(!m||!confirm('Delete team profile for '+m.name+'?'))return;const {error}=await supabase.from('team_members').delete().eq('id',m.id);if(error)status('Could not delete team profile.',true);else{await loadAll();status('Team profile deleted.');}}));
+  }
+
   async function loadHeroSettings() {
     const preview = $('hero-image-preview');
     const { data, error } = await supabase.from('site_settings').select('setting_key,setting_value').in('setting_key', ['homepage_hero_image_url','homepage_hero_image_alt']);
