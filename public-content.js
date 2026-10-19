@@ -6,6 +6,7 @@
   if (!cfg.supabaseUrl || !cfg.supabaseAnonKey || cfg.supabaseUrl.includes('YOUR_PROJECT_REF') || cfg.supabaseAnonKey.includes('YOUR_SUPABASE')) {
     message('published-events', 'Event listings will appear here once the website database is configured and events are published.');
     message('published-gallery', 'Approved gallery photographs will appear here once the database is configured and items are published.');
+    message('featured-blog', 'Featured stories will appear here once published.'); message('featured-event', 'Featured events will appear here once published.'); message('featured-gallery', 'Approved gallery photographs will appear here once published.'); message('team-grid', 'Team profiles will appear here once published.'); message('public-documents', 'Public documents will appear here once published.');
     return;
   }
   if (!window.supabase?.createClient) return;
