@@ -12,13 +12,14 @@
       const values = Object.fromEntries((data || []).map(row => [row.setting_key,row.setting_value]));
       const url = (values.homepage_hero_image_url || '').trim();
       if (!url || !/^https:\/\//i.test(url)) return;
-      hero.replaceChildren();
-      hero.style.background = '#edf2ec';
       const img = document.createElement('img');
       img.src = url; img.alt = ''; img.loading = 'eager'; img.decoding = 'async';
       img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;border-radius:inherit';
-      img.addEventListener('error', () => { hero.replaceChildren(); hero.style.background = ''; }, {once:true});
-      hero.appendChild(img);
-      hero.setAttribute('aria-label', values.homepage_hero_image_alt || 'AMI – The Good Circle community and initiatives');
+      img.addEventListener('load', () => {
+        hero.replaceChildren(img);
+        hero.style.background = '#edf2ec';
+        hero.setAttribute('aria-label', values.homepage_hero_image_alt || 'AMI – The Good Circle community and initiatives');
+      }, {once:true});
+      // If the image cannot load, leave the original illustration intact.
     });
 })();
