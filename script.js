@@ -16,6 +16,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const year = document.getElementById("year");
   if (year) year.textContent = new Date().getFullYear();
 
+  document.querySelectorAll(".viewer-close").forEach(button => button.addEventListener("click", () => button.closest("dialog")?.close()));
+  document.querySelectorAll("dialog.content-viewer").forEach(dialog => dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); }));
+
   // Demo-only: validates the form in the browser but does not send or store submissions.
   document.querySelectorAll(".demo-form").forEach(form => {
     form.addEventListener("submit", event => {
