@@ -173,11 +173,15 @@
 
 
   const richEditor=$('blog-body');
-  function editorCommand(command,value=null){richEditor.focus();document.execCommand(command,false,value);}
+  let savedEditorRange=null;
+  function rememberEditorSelection(){const sel=window.getSelection();if(sel&&sel.rangeCount&&richEditor.contains(sel.anchorNode))savedEditorRange=sel.getRangeAt(0).cloneRange();}
+  document.addEventListener('selectionchange',rememberEditorSelection);
+  function restoreEditorSelection(){richEditor.focus();const sel=window.getSelection();if(savedEditorRange&&sel){sel.removeAllRanges();sel.addRange(savedEditorRange);}}
+  function editorCommand(command,value=null){restoreEditorSelection();document.execCommand(command,false,value);rememberEditorSelection();}
   document.querySelectorAll('[data-command]').forEach(btn=>btn.addEventListener('click',()=>editorCommand(btn.dataset.command)));
   $('blog-text-color').addEventListener('input',e=>editorCommand('foreColor',e.target.value));
   $('blog-highlight-color').addEventListener('input',e=>editorCommand('hiliteColor',e.target.value));
-  $('blog-font-size').addEventListener('change',e=>{const size=Number(e.target.value);if(!size)return;const sel=window.getSelection();if(!sel||sel.rangeCount===0||sel.isCollapsed){status('Select the text you want to resize first.',true);e.target.value='';return;}const range=sel.getRangeAt(0),span=document.createElement('span');span.style.fontSize=size+'px';try{range.surroundContents(span);}catch(_){span.appendChild(range.extractContents());range.insertNode(span);}sel.removeAllRanges();e.target.value='';});
+  $('blog-font-size').addEventListener('change',e=>{const size=Number(e.target.value);if(!size)return;const sel=window.getSelection();if(!sel||sel.rangeCount===0||sel.isCollapsed){status('Select the text you want to resize first.',true);e.target.value='';return;}const range=savedEditorRange||sel.getRangeAt(0),span=document.createElement('span');span.style.fontSize=size+'px';try{range.surroundContents(span);}catch(_){span.appendChild(range.extractContents());range.insertNode(span);}sel.removeAllRanges();e.target.value='';});
   $('blog-insert-image').addEventListener('click',()=>$('blog-inline-image-file').click());
   async function uploadBlogImage(file){if(!file)return null;if(!file.type.startsWith('image/')){status('Choose an image file.',true);return null;}if(file.size>8*1024*1024){status('Image must be 8 MB or smaller.',true);return null;}const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg',path='blogs/'+crypto.randomUUID()+'.'+ext;status('Uploading image…');const {error}=await supabase.storage.from('ami-gallery').upload(path,file,{contentType:file.type,cacheControl:'3600',upsert:false});if(error){status('Image upload failed. Check the ami-gallery bucket and admin storage policies.',true);console.error(error);return null;}return supabase.storage.from('ami-gallery').getPublicUrl(path).data.publicUrl;}
   $('blog-inline-image-file').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;const url=await uploadBlogImage(file);if(url){richEditor.focus();const img=document.createElement('img');img.src=url;img.alt='';img.style.maxWidth='100%';img.style.height='auto';const sel=window.getSelection();if(sel&&sel.rangeCount){const range=sel.getRangeAt(0);range.insertNode(img);range.setStartAfter(img);range.collapse(true);sel.removeAllRanges();sel.addRange(range);}else richEditor.appendChild(img);status('Image uploaded and inserted into the article.');}e.target.value='';});
