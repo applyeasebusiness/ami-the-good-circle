@@ -1,6 +1,6 @@
 -- AMI professional website content migration.
 -- Run once in Supabase SQL Editor after the existing AMI schema.sql has been applied.
--- This adds editable public copy, team profiles, and transparency documents.
+-- Adds editable public copy, team profiles, and transparency documents.
 
 -- ===== supabase/page_content_settings_migration.sql =====
 -- Editable page headings and introductions managed from the admin dashboard.
