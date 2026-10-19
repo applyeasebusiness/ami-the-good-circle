@@ -11,6 +11,7 @@
   let galleryItems = [];
   let blogPosts = [];
   let teamMembers = [];
+  let publicDocuments = [];
 
   function status(message, error = false) {
     globalStatus.innerHTML = '';
@@ -69,14 +70,15 @@
 
   async function loadAll() {
     status('Loading dashboard data…');
-    const [s, e, g, b, t] = await Promise.all([
+    const [s, e, g, b, t, d] = await Promise.all([
       supabase.from('form_submissions').select('id,form_type,payload,status,admin_notes,created_at').order('created_at', { ascending: false }).limit(500),
       supabase.from('events').select('*').order('starts_at', { ascending: false, nullsFirst: false }),
       supabase.from('gallery_items').select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: false }),
       supabase.from('blog_posts').select('*').order('created_at', { ascending: false }),
-      supabase.from('team_members').select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: false })
+      supabase.from('team_members').select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: false }),
+      supabase.from('public_documents').select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: false })
     ]);
-    const failed = [s,e,g,b,t].find(x => x.error);
+    const failed = [s,e,g,b,t,d].find(x => x.error);
     if (failed) { status('Could not load some dashboard data. Confirm schema.sql was run and this user has the admin role.', true); console.error('Admin dashboard load error:', failed.error); }
     submissions = s.data || []; events = e.data || []; galleryItems = g.data || []; blogPosts = b.data || []; teamMembers = t.data || [];
     renderSubmissions(); renderEvents(); renderGallery(); renderBlogs(); renderTeam();
@@ -216,6 +218,38 @@
     host.innerHTML='<table class="admin-table"><thead><tr><th>Person</th><th>Visibility</th><th>Actions</th></tr></thead><tbody>'+teamMembers.map(m=>'<tr><td>'+(m.photo_url?'<img class="admin-thumb" src="'+safe(m.photo_url)+'" alt="">':'')+'<strong>'+safe(m.name)+'</strong><br><span class="admin-muted">'+safe(m.role_title)+'</span><p>'+safe(m.bio).slice(0,180)+'</p></td><td><span class="admin-badge">'+(m.published?'published':'draft')+'</span></td><td><div class="admin-actions"><button data-edit-team="'+safe(m.id)+'">Edit</button><button class="danger" data-delete-team="'+safe(m.id)+'">Delete</button></div></td></tr>').join('')+'</tbody></table>';
     host.querySelectorAll('[data-edit-team]').forEach(btn=>btn.addEventListener('click',()=>{const m=teamMembers.find(x=>x.id===btn.dataset.editTeam);if(!m)return;$('team-id').value=m.id;$('team-name').value=m.name;$('team-role').value=m.role_title;$('team-bio').value=m.bio;$('team-photo-url').value=m.photo_url;$('team-order').value=m.sort_order;$('team-published').value=String(m.published);$('team-form-title').textContent='Edit team member';$('team-photo-preview').innerHTML=m.photo_url?'<img src="'+safe(m.photo_url)+'" alt="Team photo preview" style="display:block;width:100%;max-height:240px;object-fit:contain;border-radius:12px">':'';$('panel-team').scrollIntoView({behavior:'smooth'});}));
     host.querySelectorAll('[data-delete-team]').forEach(btn=>btn.addEventListener('click',async()=>{const m=teamMembers.find(x=>x.id===btn.dataset.deleteTeam);if(!m||!confirm('Delete team profile for '+m.name+'?'))return;const {error}=await supabase.from('team_members').delete().eq('id',m.id);if(error)status('Could not delete team profile.',true);else{await loadAll();status('Team profile deleted.');}}));
+  }
+
+
+  $('document-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    const id=$('document-id').value;
+    let documentUrl=$('document-url').value.trim();
+    const file=$('document-file').files?.[0];
+    if(file){
+      if(file.size>10*1024*1024){status('Document must be 10 MB or smaller.',true);return;}
+      const ext=(file.name.split('.').pop()||'pdf').toLowerCase().replace(/[^a-z0-9]/g,'');
+      if(!['pdf','doc','docx','xlsx','csv'].includes(ext)){status('Choose a PDF, DOC, DOCX, XLSX or CSV file.',true);return;}
+      const path='transparency/'+crypto.randomUUID()+'.'+ext;
+      status('Uploading document…');
+      const upload=await supabase.storage.from('ami-gallery').upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type||'application/octet-stream'});
+      if(upload.error){status('Document upload failed. Check the ami-gallery storage permissions.',true);console.error(upload.error);return;}
+      documentUrl=supabase.storage.from('ami-gallery').getPublicUrl(path).data.publicUrl;
+    }
+    if(!/^https:\/\//i.test(documentUrl)){status('Provide an HTTPS document URL or upload a file.',true);return;}
+    const payload={title:$('document-title').value.trim(),category:$('document-category').value,description:$('document-description').value.trim(),document_url:documentUrl,published:$('document-published').value==='true',sort_order:Math.max(0,Number($('document-order').value)||0)};
+    const result=id?await supabase.from('public_documents').update(payload).eq('id',id):await supabase.from('public_documents').insert(payload);
+    if(result.error){status('Could not save document. Run supabase/transparency_documents_migration.sql first.',true);console.error(result.error);return;}
+    resetDocumentForm();await loadAll();status('Transparency document saved.');
+  });
+  $('document-cancel').addEventListener('click',resetDocumentForm);
+  function resetDocumentForm(){$('document-form').reset();$('document-id').value='';$('document-order').value='0';$('document-published').value='false';$('document-form-title').textContent='Add public document or update';}
+  function renderDocuments(){
+    const host=$('documents-list');if(!host)return;
+    if(!publicDocuments.length){host.innerHTML='<p class="admin-empty">No public documents yet. Add an approved document above.</p>';return;}
+    host.innerHTML='<table class="admin-table"><thead><tr><th>Document</th><th>Visibility</th><th>Actions</th></tr></thead><tbody>'+publicDocuments.map(d=>'<tr><td><strong>'+safe(d.title)+'</strong><br><span class="admin-muted">'+safe(d.category)+'</span><p>'+safe(d.description)+'</p><a href="'+safe(d.document_url)+'" target="_blank" rel="noopener noreferrer">Open document</a></td><td><span class="admin-badge">'+(d.published?'published':'draft')+'</span></td><td><div class="admin-actions"><button data-edit-document="'+safe(d.id)+'">Edit</button><button class="danger" data-delete-document="'+safe(d.id)+'">Delete</button></div></td></tr>').join('')+'</tbody></table>';
+    host.querySelectorAll('[data-edit-document]').forEach(btn=>btn.addEventListener('click',()=>{const d=publicDocuments.find(x=>x.id===btn.dataset.editDocument);if(!d)return;$('document-id').value=d.id;$('document-title').value=d.title;$('document-category').value=d.category;$('document-description').value=d.description;$('document-url').value=d.document_url;$('document-order').value=d.sort_order;$('document-published').value=String(d.published);$('document-form-title').textContent='Edit public document';$('panel-documents').scrollIntoView({behavior:'smooth'});}));
+    host.querySelectorAll('[data-delete-document]').forEach(btn=>btn.addEventListener('click',async()=>{const d=publicDocuments.find(x=>x.id===btn.dataset.deleteDocument);if(!d||!confirm('Delete public document '+d.title+'?'))return;const {error}=await supabase.from('public_documents').delete().eq('id',d.id);if(error)status('Could not delete document.',true);else{await loadAll();status('Document deleted.');}}));
   }
 
   async function loadHeroSettings() {
