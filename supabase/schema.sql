@@ -46,6 +46,7 @@ create table if not exists public.gallery_items (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.blog_posts (id uuid primary key default gen_random_uuid(),title text not null,slug text not null unique,excerpt text not null default '',body text not null default '',cover_image_url text not null default '',author_name text not null default '',status text not null default 'draft' check(status in ('draft','published','archived')),published_at timestamptz,created_at timestamptz not null default now(),updated_at timestamptz not null default now());
 create or replace function public.set_updated_at()
 returns trigger language plpgsql set search_path = public as $$
 begin new.updated_at = now(); return new; end;
@@ -72,6 +73,7 @@ alter table public.form_submissions enable row level security;
 alter table public.profiles enable row level security;
 alter table public.events enable row level security;
 alter table public.gallery_items enable row level security;
+alter table public.blog_posts enable row level security;
 
 -- The Vercel server function uses SUPABASE_SERVICE_ROLE_KEY to insert submissions.
 -- No anon/authenticated policies are granted for public form-submission access.
@@ -104,6 +106,9 @@ create policy "Public can read published gallery items" on public.gallery_items 
 drop policy if exists "Admins manage gallery items" on public.gallery_items;
 create policy "Admins manage gallery items" on public.gallery_items for all to authenticated using (public.is_ami_admin()) with check (public.is_ami_admin());
 
+revoke all on public.blog_posts from anon, authenticated; grant select on public.blog_posts to anon, authenticated; grant insert,update,delete on public.blog_posts to authenticated;
+drop policy if exists "Public can read published blog posts" on public.blog_posts; create policy "Public can read published blog posts" on public.blog_posts for select to anon,authenticated using(status='published' or public.is_ami_admin());
+drop policy if exists "Admins manage blog posts" on public.blog_posts; create policy "Admins manage blog posts" on public.blog_posts for all to authenticated using(public.is_ami_admin()) with check(public.is_ami_admin());
 -- Gallery storage: public image delivery, authenticated admins only for upload/update/delete.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('ami-gallery', 'ami-gallery', true, 5242880, array['image/jpeg','image/png','image/webp'])
