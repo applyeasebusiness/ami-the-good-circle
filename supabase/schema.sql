@@ -46,7 +46,7 @@ create table if not exists public.gallery_items (
   updated_at timestamptz not null default now()
 );
 
-create table if not exists public.blog_posts (id uuid primary key default gen_random_uuid(),title text not null,slug text not null unique,excerpt text not null default '',body text not null default '',cover_image_url text not null default '',author_name text not null default '',status text not null default 'draft' check(status in ('draft','published','archived')),published_at timestamptz,created_at timestamptz not null default now(),updated_at timestamptz not null default now());
+create table if not exists public.blog_posts (id uuid primary key default gen_random_uuid(),title text not null,slug text not null unique,excerpt text not null default '',seo_description text not null default '',body text not null default '',cover_image_url text not null default '',author_name text not null default '',status text not null default 'draft' check(status in ('draft','published','archived')),published_at timestamptz,created_at timestamptz not null default now(),updated_at timestamptz not null default now());
 create or replace function public.set_updated_at()
 returns trigger language plpgsql set search_path = public as $$
 begin new.updated_at = now(); return new; end;
