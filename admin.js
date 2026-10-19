@@ -9,6 +9,7 @@
   let submissions = [];
   let events = [];
   let galleryItems = [];
+  let blogPosts = [];
 
   function status(message, error = false) {
     globalStatus.innerHTML = '';
@@ -66,15 +67,16 @@
 
   async function loadAll() {
     status('Loading dashboard data…');
-    const [s, e, g] = await Promise.all([
+    const [s, e, g, b] = await Promise.all([
       supabase.from('form_submissions').select('id,form_type,payload,status,admin_notes,created_at').order('created_at', { ascending: false }).limit(500),
       supabase.from('events').select('*').order('starts_at', { ascending: false, nullsFirst: false }),
-      supabase.from('gallery_items').select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: false })
+      supabase.from('gallery_items').select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: false }),
+      supabase.from('blog_posts').select('*').order('created_at', { ascending: false })
     ]);
-    const failed = [s,e,g].find(x => x.error);
+    const failed = [s,e,g,b].find(x => x.error);
     if (failed) { status('Could not load some dashboard data. Confirm schema.sql was run and this user has the admin role.', true); console.error('Admin dashboard load error:', failed.error); }
-    submissions = s.data || []; events = e.data || []; galleryItems = g.data || [];
-    renderSubmissions(); renderEvents(); renderGallery();
+    submissions = s.data || []; events = e.data || []; galleryItems = g.data || []; blogPosts = b.data || [];
+    renderSubmissions(); renderEvents(); renderGallery(); renderBlogs();
     if (!failed) status(`Loaded ${submissions.length} submissions, ${events.length} events and ${galleryItems.length} gallery items.`);
   }
 
@@ -167,6 +169,12 @@
       if (error) status('Could not delete gallery item.', true); else { await loadAll(); status('Gallery item deleted. Remove the unused image from Supabase Storage if no longer needed.'); }
     }));
   }
+
+
+  $('blog-title').addEventListener('input',()=>{if(!$('blog-id').value)$('blog-slug').value=$('blog-title').value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,120);});
+  $('blog-form').addEventListener('submit',async event=>{event.preventDefault();const id=$('blog-id').value,st=$('blog-status').value;const payload={title:$('blog-title').value.trim(),slug:$('blog-slug').value.trim(),excerpt:$('blog-excerpt').value.trim(),body:$('blog-body').value.trim(),author_name:$('blog-author').value.trim(),cover_image_url:$('blog-cover').value.trim(),status:st,published_at:st==='published'?(blogPosts.find(x=>x.id===id)?.published_at||new Date().toISOString()):null};if(payload.cover_image_url&&!/^https:\/\//i.test(payload.cover_image_url)){status('Cover image URL must use HTTPS.',true);return;}const btn=$('blog-form').querySelector('[type="submit"]');btn.disabled=true;const r=id?await supabase.from('blog_posts').update(payload).eq('id',id):await supabase.from('blog_posts').insert(payload);btn.disabled=false;if(r.error){status('Could not save blog post. Make sure the blog database migration has been run.',true);return;}resetBlog();await loadAll();status('Blog post saved.');});
+  $('blog-cancel').addEventListener('click',resetBlog);function resetBlog(){$('blog-form').reset();$('blog-id').value='';$('blog-form-title').textContent='Write a blog post';$('blog-status').value='draft';}
+  function renderBlogs(){const host=$('blogs-list');if(!blogPosts.length){host.innerHTML='<p class="admin-empty">No blog posts yet. Write one above.</p>';return;}host.innerHTML='<table class="admin-table"><thead><tr><th>Article</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+blogPosts.map(p=>'<tr><td><strong>'+safe(p.title)+'</strong><br>'+safe(p.slug)+'<p>'+safe(p.excerpt)+'</p></td><td>'+safe(p.status)+'</td><td><div class="admin-actions"><button data-edit-blog="'+safe(p.id)+'">Edit</button><button class="danger" data-delete-blog="'+safe(p.id)+'">Delete</button></div></td></tr>').join('')+'</tbody></table>';host.querySelectorAll('[data-edit-blog]').forEach(btn=>btn.addEventListener('click',()=>{const p=blogPosts.find(x=>x.id===btn.dataset.editBlog);if(!p)return;$('blog-id').value=p.id;$('blog-title').value=p.title;$('blog-slug').value=p.slug;$('blog-excerpt').value=p.excerpt;$('blog-body').value=p.body;$('blog-author').value=p.author_name;$('blog-cover').value=p.cover_image_url;$('blog-status').value=p.status;$('blog-form-title').textContent='Edit blog post';$('panel-blogs').scrollIntoView({behavior:'smooth'});}));host.querySelectorAll('[data-delete-blog]').forEach(btn=>btn.addEventListener('click',async()=>{const p=blogPosts.find(x=>x.id===btn.dataset.deleteBlog);if(!p||!confirm('Delete blog post "'+p.title+'"?'))return;const {error}=await supabase.from('blog_posts').delete().eq('id',p.id);if(error)status('Could not delete blog post.',true);else{await loadAll();status('Blog post deleted.');}}));}
 
   supabase.auth.getSession().then(({ data }) => { if (data.session?.user) verifyAdmin(data.session.user); });
   supabase.auth.onAuthStateChange((event, session) => { if (event === 'SIGNED_OUT' || !session) showLogin(); });
