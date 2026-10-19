@@ -29,7 +29,7 @@
   function safeRichHtml(html){const doc=new DOMParser().parseFromString(String(html||''),'text/html');const allowed=new Set(['P','BR','STRONG','B','EM','I','U','UL','OL','LI','H2','H3','H4','BLOCKQUOTE','A','SPAN','IMG','DIV']);doc.body.querySelectorAll('*').forEach(el=>{if(!allowed.has(el.tagName)){el.replaceWith(...el.childNodes);return;}[...el.attributes].forEach(a=>{if(el.tagName==='A'&&a.name==='href'&&/^https:\/\//i.test(a.value)){el.setAttribute('rel','noopener noreferrer');el.setAttribute('target','_blank');}else if(el.tagName==='IMG'&&a.name==='src'&&/^https:\/\//i.test(a.value)){}else if(a.name==='style'){const keep=[];a.value.split(';').forEach(rule=>{const z=rule.split(':');if(z.length<2)return;const k=z[0].trim().toLowerCase(),v=z.slice(1).join(':').trim();if(k==='color'&&/^(#[0-9a-f]{3,8}|rgb\(|rgba\(|[a-z]+$)/i.test(v))keep.push(k+':'+v);if(k==='background-color'&&/^(#[0-9a-f]{3,8}|rgb\(|rgba\(|[a-z]+$)/i.test(v))keep.push(k+':'+v);if(k==='font-size'&&/^\d{1,2}(px|pt|em|rem|%)$/.test(v))keep.push(k+':'+v);if(k==='text-align'&&/^(left|right|center|justify)$/.test(v))keep.push(k+':'+v);if(k==='max-width'&&v==='100%')keep.push(k+':'+v);if(k==='height'&&v==='auto')keep.push(k+':'+v);});if(keep.length)el.setAttribute('style',keep.join(';'));else el.removeAttribute('style');}else if(!((el.tagName==='A'&&a.name==='href')||(el.tagName==='IMG'&&a.name==='src')||['alt','title'].includes(a.name)))el.removeAttribute(a.name);});});return doc.body.innerHTML;}
   async function loadBlogs() {
     const host = document.getElementById('published-blogs'); if (!host) return;
-    const { data, error } = await client.from('blog_posts').select('title,slug,excerpt,cover_image_url,author_name,published_at').eq('status','published').order('published_at',{ascending:false,nullsFirst:false});
+    const { data, error } = await client.from('blog_posts').select('title,slug,excerpt,seo_description,cover_image_url,author_name,published_at').eq('status','published').order('published_at',{ascending:false,nullsFirst:false});
     if (error) { message('published-blogs','Blog articles are temporarily unavailable.'); return; }
     if (!data?.length) { message('published-blogs','No articles have been published yet.'); return; }
     host.innerHTML = data.map(x => `<article class="simple-card">${x.cover_image_url ? `<img class="content-image blog-cover" src="${esc(x.cover_image_url)}" alt="">` : ''}<p class="eyebrow">${esc(date(x.published_at))}</p><h2 class="content-card-title">${esc(x.title)}</h2><p>${esc(x.excerpt)}</p><p class="admin-muted">${esc(x.author_name)}</p><a class="text-link" href="blog.html?slug=${encodeURIComponent(x.slug)}">Read article ↗</a></article>`).join('');
@@ -37,9 +37,15 @@
   async function loadArticle() {
     const host = document.getElementById('blog-article'); if (!host) return;
     const slug = new URLSearchParams(location.search).get('slug');
-    const { data, error } = await client.from('blog_posts').select('title,excerpt,body,cover_image_url,author_name,published_at').eq('slug',slug || '').eq('status','published').maybeSingle();
+    const { data, error } = await client.from('blog_posts').select('title,excerpt,seo_description,body,cover_image_url,author_name,published_at').eq('slug',slug || '').eq('status','published').maybeSingle();
     if (error || !data) { message('blog-article','This article is unavailable or has not been published.'); return; }
     document.title = data.title + ' | AMI – The Good Circle';
+    const seoDescription = (data.seo_description || data.excerpt || '').slice(0,160);
+    let descMeta = document.querySelector('meta[name="description"]'); if(!descMeta){descMeta=document.createElement('meta');descMeta.name='description';document.head.appendChild(descMeta);} descMeta.content=seoDescription;
+    const canonical = location.origin + '/blog?slug=' + encodeURIComponent(slug || '');
+    let canonicalTag=document.querySelector('link[rel="canonical"]');if(!canonicalTag){canonicalTag=document.createElement('link');canonicalTag.rel='canonical';document.head.appendChild(canonicalTag);}canonicalTag.href=canonical;
+    for(const item of [['og:title',document.title],['og:description',seoDescription],['og:url',canonical],['og:type','article'],['og:image',data.cover_image_url || location.origin+'/ami-logo.jpg']]){let tag=document.querySelector('meta[property="'+item[0]+'"]');if(!tag){tag=document.createElement('meta');tag.setAttribute('property',item[0]);document.head.appendChild(tag);}tag.content=item[1];}
+    let twitterDesc=document.querySelector('meta[name="twitter:description"]');if(twitterDesc)twitterDesc.content=seoDescription;
     host.innerHTML = `<article class="blog-article">${data.cover_image_url ? `<img class="content-image blog-article-cover" src="${esc(data.cover_image_url)}" alt="">` : ''}<p class="eyebrow">${esc(date(data.published_at))}</p><h1>${esc(data.title)}</h1><p class="section-lead">${esc(data.excerpt)}</p><p class="admin-muted">${esc(data.author_name)}</p><div class="blog-body">${safeRichHtml(data.body)}</div></article>`;
   }
   loadEvents(); loadGallery(); loadBlogs(); loadArticle();
